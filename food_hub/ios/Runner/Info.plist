@@ -51,6 +51,10 @@
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
+	<key>NSCameraUsageDescription</key>
+	<string>FoodHub uses the camera to add photos to your own recipes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>FoodHub uses the photo library to pick recipe photos.</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>

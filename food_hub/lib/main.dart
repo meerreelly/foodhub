@@ -1,20 +1,29 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
-  runApp(const MainApp());
-}
+import 'app.dart';
+import 'core/firebase/firebase_env_options.dart';
+import 'core/firebase/firebase_status.dart';
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
 
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
-    );
+  var firebaseReady = false;
+  try {
+    await Firebase.initializeApp(options: FirebaseEnvOptions.currentPlatform);
+    firebaseReady = true;
+  } catch (_) {
+    debugPrint('Firebase initialization failed. Running app without Firebase.');
+    firebaseReady = false;
   }
+
+  runApp(
+    ProviderScope(
+      overrides: [firebaseReadyProvider.overrideWithValue(firebaseReady)],
+      child: const FoodHubApp(),
+    ),
+  );
 }
