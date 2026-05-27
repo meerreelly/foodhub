@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../shared/presentation/glass.dart';
 import '../data/custom_recipe_repository.dart';
 
 class CustomRecipeDetailsScreen extends ConsumerWidget {
@@ -58,23 +59,22 @@ class _DetailsBody extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 260,
             pinned: true,
             title: Text(recipe.title),
             actions: [
-              IconButton(
+              IconButton.filledTonal(
                 onPressed: () =>
                     context.push(AppRoutes.editCustomRecipe(recipe.id)),
-                icon: const Icon(Icons.edit),
+                icon: const Icon(Icons.edit_rounded),
               ),
-              IconButton(
+              IconButton.filledTonal(
                 onPressed: () => _delete(context, ref),
-                icon: const Icon(Icons.delete_outline),
+                icon: const Icon(Icons.delete_outline_rounded),
               ),
             ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: _RecipeImage(recipe: recipe),
-            ),
+          ),
+          SliverToBoxAdapter(
+            child: _RecipeImage(recipe: recipe),
           ),
           SliverPadding(
             padding: const EdgeInsets.all(18),
@@ -83,19 +83,33 @@ class _DetailsBody extends ConsumerWidget {
                 if (recipe.category.isNotEmpty)
                   Chip(label: Text(recipe.category)),
                 const SizedBox(height: 18),
-                Text(
-                  l10n.t('ingredients'),
-                  style: Theme.of(context).textTheme.titleLarge,
+                GlassPanel(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _SectionTitle(
+                        icon: Icons.checklist_rounded,
+                        title: l10n.t('ingredients'),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(recipe.ingredients),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(recipe.ingredients),
                 const SizedBox(height: 18),
-                Text(
-                  l10n.t('steps'),
-                  style: Theme.of(context).textTheme.titleLarge,
+                GlassPanel(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _SectionTitle(
+                        icon: Icons.notes_rounded,
+                        title: l10n.t('steps'),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(recipe.steps),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(recipe.steps),
               ],
             ),
           ),
@@ -129,6 +143,24 @@ class _DetailsBody extends ConsumerWidget {
   }
 }
 
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.icon, required this.title});
+
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon),
+        const SizedBox(width: 8),
+        Text(title, style: Theme.of(context).textTheme.titleLarge),
+      ],
+    );
+  }
+}
+
 class _RecipeImage extends StatelessWidget {
   const _RecipeImage({required this.recipe});
 
@@ -137,24 +169,36 @@ class _RecipeImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (recipe.imageUrl.isNotEmpty) {
-      return CachedNetworkImage(
-        imageUrl: recipe.imageUrl,
-        fit: BoxFit.cover,
-        errorWidget: (context, url, error) =>
-            const ColoredBox(color: Colors.black12),
+      return SizedBox(
+        height: 260,
+        width: double.infinity,
+        child: CachedNetworkImage(
+          imageUrl: recipe.imageUrl,
+          fit: BoxFit.cover,
+          errorWidget: (context, url, error) =>
+              const ColoredBox(color: Colors.black12),
+        ),
       );
     }
     if (recipe.localImagePath.isNotEmpty) {
-      return Image.file(
-        File(recipe.localImagePath),
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) =>
-            const ColoredBox(color: Colors.black12),
+      return SizedBox(
+        height: 260,
+        width: double.infinity,
+        child: Image.file(
+          File(recipe.localImagePath),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              const ColoredBox(color: Colors.black12),
+        ),
       );
     }
-    return const ColoredBox(
-      color: Colors.black12,
-      child: Center(child: Icon(Icons.restaurant, size: 56)),
+    return const SizedBox(
+      height: 220,
+      width: double.infinity,
+      child: ColoredBox(
+        color: Colors.black12,
+        child: Center(child: Icon(Icons.restaurant, size: 56)),
+      ),
     );
   }
 }

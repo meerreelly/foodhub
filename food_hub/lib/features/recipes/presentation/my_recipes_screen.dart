@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../shared/presentation/glass.dart';
 import '../data/custom_recipe_repository.dart';
 
 class MyRecipesScreen extends ConsumerWidget {
@@ -22,9 +23,9 @@ class MyRecipesScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.t('myRecipes')),
         actions: [
-          IconButton(
+          IconButton.filledTonal(
             onPressed: () => context.push(AppRoutes.addRecipe),
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add_rounded),
           ),
         ],
       ),
@@ -38,17 +39,29 @@ class MyRecipesScreen extends ConsumerWidget {
           }
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
-            itemCount: items.length,
+            itemCount: items.length + 1,
             separatorBuilder: (context, index) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
-              final recipe = items[index];
-              return Card(
-                clipBehavior: Clip.antiAlias,
+              if (index == 0) {
+                return GlassPanel(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.add_circle_rounded),
+                    title: Text(l10n.t('addRecipe')),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => context.push(AppRoutes.addRecipe),
+                  ),
+                );
+              }
+              final recipe = items[index - 1];
+              return GlassPanel(
+                padding: EdgeInsets.zero,
                 child: ListTile(
+                  contentPadding: const EdgeInsets.all(10),
                   leading: _RecipeThumb(recipe: recipe),
                   title: Text(recipe.title),
                   subtitle: Text(recipe.category),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push(AppRoutes.customRecipe(recipe.id)),
                 ),
               );

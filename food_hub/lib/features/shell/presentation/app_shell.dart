@@ -16,8 +16,8 @@ class AppShell extends StatelessWidget {
     final location = GoRouterState.of(context).matchedLocation;
     final index = switch (location) {
       AppRoutes.favorites => 1,
-      AppRoutes.addRecipe => 2,
       AppRoutes.myRecipes => 2,
+      AppRoutes.addRecipe => 2,
       AppRoutes.profile => 3,
       AppRoutes.mealPlan => 3,
       AppRoutes.settings => 3,
@@ -27,41 +27,103 @@ class AppShell extends StatelessWidget {
     return Scaffold(
       body: child,
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-        child: GlassPanel(
-          padding: EdgeInsets.zero,
-          child: NavigationBar(
-            selectedIndex: index,
-            backgroundColor: Colors.transparent,
-            onDestinationSelected: (value) {
-              final path = [
-                AppRoutes.home,
-                AppRoutes.favorites,
-                AppRoutes.addRecipe,
-                AppRoutes.profile,
-              ][value];
-              context.go(path);
-            },
-            destinations: [
-              NavigationDestination(
-                icon: const Icon(Icons.home_outlined),
-                selectedIcon: const Icon(Icons.home),
-                label: l10n.t('home'),
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: GlassPanel(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                child: Row(
+                  children: [
+                    _ShellTab(
+                      selected: index == 0,
+                      icon: Icons.home_rounded,
+                      label: l10n.t('home'),
+                      onTap: () => context.go(AppRoutes.home),
+                    ),
+                    _ShellTab(
+                      selected: index == 1,
+                      icon: Icons.favorite_rounded,
+                      label: l10n.t('favorites'),
+                      onTap: () => context.go(AppRoutes.favorites),
+                    ),
+                    _ShellTab(
+                      selected: index == 2,
+                      icon: Icons.menu_book_rounded,
+                      label: l10n.t('myRecipes'),
+                      onTap: () => context.go(AppRoutes.myRecipes),
+                    ),
+                  ],
+                ),
               ),
-              NavigationDestination(
-                icon: const Icon(Icons.favorite_border),
-                selectedIcon: const Icon(Icons.favorite),
-                label: l10n.t('favorites'),
+            ),
+            const SizedBox(width: 10),
+            GlassPanel(
+              padding: const EdgeInsets.all(8),
+              child: IconButton.filledTonal(
+                isSelected: index == 3,
+                tooltip: l10n.t('profile'),
+                onPressed: () => context.go(AppRoutes.profile),
+                icon: const Icon(Icons.person_rounded),
               ),
-              NavigationDestination(
-                icon: const Icon(Icons.add_circle_outline),
-                selectedIcon: const Icon(Icons.add_circle),
-                label: l10n.t('addRecipe'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ShellTab extends StatelessWidget {
+  const _ShellTab({
+    required this.selected,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final bool selected;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Expanded(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          height: 54,
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          decoration: BoxDecoration(
+            color: selected
+                ? colors.primaryContainer.withValues(alpha: .70)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: selected ? colors.onPrimaryContainer : colors.onSurfaceVariant,
               ),
-              NavigationDestination(
-                icon: const Icon(Icons.person_outline),
-                selectedIcon: const Icon(Icons.person),
-                label: l10n.t('profile'),
+              const SizedBox(height: 2),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: selected
+                            ? colors.onPrimaryContainer
+                            : colors.onSurfaceVariant,
+                        fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                      ),
+                ),
               ),
             ],
           ),

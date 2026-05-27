@@ -28,15 +28,32 @@ final categoryMealsProvider = FutureProvider.family<List<MealSummary>, String>((
 enum SearchMode { name, ingredient }
 
 class SearchQuery {
-  const SearchQuery({required this.query, required this.mode});
+  const SearchQuery({required this.query, required this.mode, this.category});
 
   final String query;
   final SearchMode mode;
+  final String? category;
+
+  @override
+  bool operator ==(Object other) {
+    return other is SearchQuery &&
+        other.query == query &&
+        other.mode == mode &&
+        other.category == category;
+  }
+
+  @override
+  int get hashCode => Object.hash(query, mode, category);
 }
 
 final searchMealsProvider = FutureProvider.family<List<MealSummary>, SearchQuery>((ref, search) {
-  if (search.query.trim().isEmpty) return Future.value(const []);
+  if (search.query.trim().isEmpty && (search.category?.isEmpty ?? true)) {
+    return Future.value(const []);
+  }
   final repo = ref.watch(mealRepositoryProvider);
+  if (search.query.trim().isEmpty && search.category != null) {
+    return repo.fetchByCategory(search.category!);
+  }
   return search.mode == SearchMode.name
       ? repo.searchByName(search.query.trim())
       : repo.searchByIngredient(search.query.trim());

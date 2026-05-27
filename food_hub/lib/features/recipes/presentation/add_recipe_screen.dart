@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../shared/presentation/glass.dart';
 import '../data/custom_recipe_repository.dart';
 
 class AddRecipeScreen extends ConsumerStatefulWidget {
@@ -38,114 +39,105 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final mine = ref.watch(myRecipesProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.t('addRecipe')),
-        actions: [
-          IconButton(
-            onPressed: () => context.push(AppRoutes.myRecipes),
-            icon: const Icon(Icons.list_alt),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n.t('addRecipe'))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
         children: [
-          Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: Column(
-              children: [
-                if (_image != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      _image!,
-                      height: 180,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+          GlassPanel(
+            child: Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                children: [
+                  if (_image != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        _image!,
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  const SizedBox(height: 10),
+                  PopupMenuButton<ImageSource>(
+                    onSelected: _pick,
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: ImageSource.gallery,
+                        child: ListTile(
+                          leading: const Icon(Icons.photo_library_rounded),
+                          title: Text(l10n.t('pickGallery')),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: ImageSource.camera,
+                        child: ListTile(
+                          leading: const Icon(Icons.camera_alt_rounded),
+                          title: Text(l10n.t('pickCamera')),
+                        ),
+                      ),
+                    ],
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.add_photo_alternate_rounded),
+                          const SizedBox(width: 8),
+                          Text(l10n.t('choosePhoto')),
+                          const SizedBox(width: 6),
+                          const Icon(Icons.expand_more_rounded),
+                        ],
+                      ),
                     ),
                   ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _pick(ImageSource.gallery),
-                        icon: const Icon(Icons.photo_library),
-                        label: Text(l10n.t('pickGallery')),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _pick(ImageSource.camera),
-                        icon: const Icon(Icons.camera_alt),
-                        label: Text(l10n.t('pickCamera')),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _title,
-                  decoration: InputDecoration(labelText: l10n.t('title')),
-                  validator: _required,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _category,
-                  decoration: InputDecoration(labelText: l10n.t('category')),
-                  validator: _required,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _ingredients,
-                  decoration: InputDecoration(labelText: l10n.t('ingredients')),
-                  minLines: 3,
-                  maxLines: 5,
-                  validator: _required,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _steps,
-                  decoration: InputDecoration(labelText: l10n.t('steps')),
-                  minLines: 4,
-                  maxLines: 8,
-                  validator: _required,
-                ),
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  onPressed: _saving ? null : _save,
-                  icon: const Icon(Icons.save),
-                  label: Text(l10n.t('save')),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.t('myRecipes'),
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 10),
-          mine.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stackTrace) => Text(localizedError(context, error)),
-            data: (items) => Column(
-              children: items
-                  .map(
-                    (recipe) => ListTile(
-                      title: Text(recipe.title),
-                      subtitle: Text(recipe.category),
-                      leading: const Icon(Icons.restaurant),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () =>
-                          context.push(AppRoutes.customRecipe(recipe.id)),
-                    ),
-                  )
-                  .toList(),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _title,
+                    decoration: InputDecoration(labelText: l10n.t('title')),
+                    validator: _required,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _category,
+                    decoration: InputDecoration(labelText: l10n.t('category')),
+                    validator: _required,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _ingredients,
+                    decoration: InputDecoration(labelText: l10n.t('ingredients')),
+                    minLines: 3,
+                    maxLines: 5,
+                    validator: _required,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _steps,
+                    decoration: InputDecoration(labelText: l10n.t('steps')),
+                    minLines: 4,
+                    maxLines: 8,
+                    validator: _required,
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: _saving ? null : _save,
+                    icon: const Icon(Icons.save_rounded),
+                    label: Text(l10n.t('save')),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -180,6 +172,12 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
       _ingredients.clear();
       _steps.clear();
       setState(() => _image = null);
+      if (mounted) context.go(AppRoutes.myRecipes);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizedError(context, error))),
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }

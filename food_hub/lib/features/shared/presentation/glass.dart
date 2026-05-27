@@ -1,6 +1,5 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as liquid;
 
 class GlassPanel extends StatelessWidget {
   const GlassPanel({
@@ -14,20 +13,9 @@ class GlassPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.surfaceContainerHighest.withValues(alpha: 0.58),
-            border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.35)),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: Padding(padding: padding, child: child),
-        ),
-      ),
+    return liquid.GlassCard(
+      padding: padding,
+      child: child,
     );
   }
 }

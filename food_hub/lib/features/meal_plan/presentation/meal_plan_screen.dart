@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../shared/presentation/glass.dart';
 import '../../favorites/data/favorites_repository.dart';
 import '../data/meal_plan_repository.dart';
 
@@ -40,8 +41,9 @@ class MealPlanScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
             children: [
               if (favoriteItems.isEmpty)
-                Card(
+                GlassPanel(
                   child: ListTile(
+                    contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.favorite_border),
                     title: Text(l10n.t('noFavoritesForPlan')),
                     trailing: const Icon(Icons.chevron_right),
@@ -51,8 +53,12 @@ class MealPlanScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               ..._dayKeys.map((dayKey) {
                 final day = l10n.t(dayKey);
-                return Card(
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: GlassPanel(
+                    padding: EdgeInsets.zero,
                   child: ExpansionTile(
+                    leading: const Icon(Icons.calendar_today_rounded),
                     title: Text(day),
                     initiallyExpanded: dayKey == _dayKeys.first,
                     children: _slots.map((slot) {
@@ -78,6 +84,7 @@ class MealPlanScreen extends ConsumerWidget {
                               ),
                       );
                     }).toList(),
+                  ),
                   ),
                 );
               }),

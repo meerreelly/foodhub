@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,14 +20,16 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _search = TextEditingController();
+  final _preferredIngredients = TextEditingController();
   SearchMode _mode = SearchMode.name;
-  Timer? _debounce;
   String _query = '';
+  String? _category;
+  double _maxIngredients = 12;
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _search.dispose();
+    _preferredIngredients.dispose();
     super.dispose();
   }
 
@@ -38,8 +38,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final l10n = AppLocalizations.of(context);
     final categories = ref.watch(categoriesProvider);
     final random = ref.watch(randomMealProvider);
+    final hasSearch = _query.isNotEmpty || _category != null;
     final results = ref.watch(
-      searchMealsProvider(SearchQuery(query: _query, mode: _mode)),
+      searchMealsProvider(
+        SearchQuery(query: _query, mode: _mode, category: _category),
+      ),
     );
 
     return Scaffold(
@@ -54,43 +57,114 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             GlassPanel(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextField(
-                    controller: _search,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
-                      hintText: l10n.t('searchHint'),
-                    ),
-                    onChanged: (value) {
-                      _debounce?.cancel();
-                      _debounce = Timer(
-                        const Duration(milliseconds: 350),
-                        () => setState(() => _query = value),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  SegmentedButton<SearchMode>(
-                    segments: [
-                      ButtonSegment(
-                        value: SearchMode.name,
-                        icon: const Icon(Icons.restaurant_menu),
-                        label: Text(l10n.t('searchByName')),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _search,
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.search_rounded),
+                            hintText: l10n.t('searchHint'),
+                          ),
+                          onSubmitted: (_) => _runSearch(),
+                        ),
                       ),
-                      ButtonSegment(
-                        value: SearchMode.ingredient,
-                        icon: const Icon(Icons.eco),
-                        label: Text(l10n.t('searchByIngredient')),
+                      const SizedBox(width: 10),
+                      FilledButton(
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(56, 56),
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        onPressed: _runSearch,
+                        child: const Icon(Icons.tune_rounded),
                       ),
                     ],
-                    selected: {_mode},
-                    onSelectionChanged: (value) =>
-                        setState(() => _mode = value.first),
+                  ),
+                  const SizedBox(height: 10),
+                  ExpansionTile(
+                    tilePadding: EdgeInsets.zero,
+                    childrenPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.manage_search_rounded),
+                    title: Text(
+                      l10n.t('searchParams'),
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    children: [
+                      SegmentedButton<SearchMode>(
+                        segments: [
+                          ButtonSegment(
+                            value: SearchMode.name,
+                            icon: const Icon(Icons.restaurant_menu_rounded),
+                            label: Text(l10n.t('searchByName')),
+                          ),
+                          ButtonSegment(
+                            value: SearchMode.ingredient,
+                            icon: const Icon(Icons.eco_rounded),
+                            label: Text(l10n.t('searchByIngredient')),
+                          ),
+                        ],
+                        selected: {_mode},
+                        onSelectionChanged: (value) =>
+                            setState(() => _mode = value.first),
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String?>(
+                        initialValue: _category,
+                        decoration: InputDecoration(
+                          labelText: l10n.t('category'),
+                          prefixIcon: const Icon(Icons.category_rounded),
+                        ),
+                        items: [
+                          DropdownMenuItem(
+                            value: null,
+                            child: Text(l10n.t('allCategories')),
+                          ),
+                          ...categories.valueOrNull
+                                  ?.map(
+                                    (item) => DropdownMenuItem(
+                                      value: item.name,
+                                      child: Text(item.name),
+                                    ),
+                                  )
+                                  .toList() ??
+                              const [],
+                        ],
+                        onChanged: (value) => setState(() => _category = value),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _preferredIngredients,
+                        decoration: InputDecoration(
+                          labelText: l10n.t('preferredIngredients'),
+                          prefixIcon: const Icon(Icons.spa_rounded),
+                        ),
+                        onSubmitted: (_) => _runSearch(),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${l10n.t('maxIngredients')}: ${_maxIngredients.round()}',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      Slider(
+                        value: _maxIngredients,
+                        min: 3,
+                        max: 20,
+                        divisions: 17,
+                        label: _maxIngredients.round().toString(),
+                        onChanged: (value) =>
+                            setState(() => _maxIngredients = value),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-            if (_query.isNotEmpty) ...[
+            if (hasSearch) ...[
               const SizedBox(height: 18),
               _RecipeResults(value: results),
             ],
@@ -132,6 +206,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void _runSearch() {
+    final preferred = _preferredIngredients.text.trim();
+    setState(() {
+      _query = _search.text.trim().isEmpty ? preferred : _search.text.trim();
+    });
   }
 }
 

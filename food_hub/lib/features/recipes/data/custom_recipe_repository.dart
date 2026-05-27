@@ -153,10 +153,16 @@ class CustomRecipeRepository {
       recipe.toLocalJson(SyncStatus.pending),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    if (_canSync) {
-      await _uploadAndSave(recipe);
-    }
     await _loadLocal();
+    if (_canSync) {
+      try {
+        await _uploadAndSave(recipe);
+      } catch (_) {
+        // Keep the local pending row visible; the next sync pass can retry.
+      } finally {
+        await _loadLocal();
+      }
+    }
   }
 
   Future<void> update(CustomRecipe recipe, {File? image}) async {
@@ -170,10 +176,16 @@ class CustomRecipeRepository {
       updated.toLocalJson(SyncStatus.pending),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    if (_canSync) {
-      await _uploadAndSave(updated);
-    }
     await _loadLocal();
+    if (_canSync) {
+      try {
+        await _uploadAndSave(updated);
+      } catch (_) {
+        // Keep the local pending row visible; the next sync pass can retry.
+      } finally {
+        await _loadLocal();
+      }
+    }
   }
 
   Future<void> delete(CustomRecipe recipe) async {

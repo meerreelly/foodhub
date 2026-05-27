@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../shared/presentation/glass.dart';
 import '../data/favorites_repository.dart';
 
 class FavoritesScreen extends ConsumerWidget {
@@ -30,19 +31,21 @@ class FavoritesScreen extends ConsumerWidget {
             separatorBuilder: (context, index) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               final meal = items[index];
-              return ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              return GlassPanel(
+                padding: EdgeInsets.zero,
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(10),
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(meal.thumbnailUrl),
+                  ),
+                  title: Text(meal.name),
+                  subtitle: Text(meal.category),
+                  trailing: const Icon(
+                    Icons.favorite_rounded,
+                    color: Colors.green,
+                  ),
+                  onTap: () => context.push(AppRoutes.recipe(meal.id)),
                 ),
-                tileColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest,
-                leading: CircleAvatar(
-                  backgroundImage: NetworkImage(meal.thumbnailUrl),
-                ),
-                title: Text(meal.name),
-                subtitle: Text(meal.category),
-                onTap: () => context.push(AppRoutes.recipe(meal.id)),
               );
             },
           );
