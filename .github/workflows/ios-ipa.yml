@@ -15,6 +15,7 @@ jobs:
   build-ios-ipa:
     name: Build unsigned iOS IPA
     runs-on: macos-15
+    environment: main
     timeout-minutes: 45
 
     defaults:
@@ -31,12 +32,15 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Disable Flutter Swift Package Manager
+        run: flutter config --no-enable-swift-package-manager
+
       - name: Create .env
         env:
           DOTENV: ${{ secrets.DOTENV }}
         run: |
           if [ -z "$DOTENV" ]; then
-            echo "::error::Missing DOTENV repository secret. Add the full contents of food_hub/.env as a GitHub Actions secret named DOTENV."
+            echo "::error::Missing DOTENV secret. Add the full contents of food_hub/.env as a GitHub Actions secret named DOTENV in the main environment."
             exit 1
           fi
 
