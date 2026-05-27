@@ -8,6 +8,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../shared/presentation/app_header.dart';
+import '../../shared/presentation/glass.dart';
 import '../data/custom_recipe_repository.dart';
 
 class EditRecipeScreen extends ConsumerWidget {
@@ -19,15 +21,21 @@ class EditRecipeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final recipes = ref.watch(myRecipesProvider);
     return recipes.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => const Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(child: CircularProgressIndicator()),
+      ),
       error: (error, stackTrace) =>
-          Scaffold(body: Center(child: Text(localizedError(context, error)))),
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Center(child: Text(localizedError(context, error))),
+          ),
       data: (items) {
         for (final recipe in items) {
           if (recipe.id == id) return _EditRecipeForm(recipe: recipe);
         }
         return Scaffold(
+          backgroundColor: Colors.transparent,
           appBar: AppBar(),
           body: Center(
             child: Text(AppLocalizations.of(context).t('recipeNotFound')),
@@ -78,80 +86,88 @@ class _EditRecipeFormState extends ConsumerState<_EditRecipeForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.t('editRecipe'))),
+      backgroundColor: Colors.transparent,
+      appBar: AppHeader(
+        title: l10n.t('editRecipe'),
+        icon: Icons.edit_rounded,
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
         children: [
-          Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: Column(
-              children: [
-                if (_image != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      _image!,
-                      height: 180,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+          GlassPanel(
+            child: Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                children: [
+                  if (_image != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        _image!,
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
                     ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _pick(ImageSource.gallery),
+                          icon: const Icon(Icons.photo_library),
+                          label: Text(l10n.t('pickGallery')),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _pick(ImageSource.camera),
+                          icon: const Icon(Icons.camera_alt),
+                          label: Text(l10n.t('pickCamera')),
+                        ),
+                      ),
+                    ],
                   ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _pick(ImageSource.gallery),
-                        icon: const Icon(Icons.photo_library),
-                        label: Text(l10n.t('pickGallery')),
-                      ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _title,
+                    decoration: InputDecoration(labelText: l10n.t('title')),
+                    validator: _required,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _category,
+                    decoration: InputDecoration(labelText: l10n.t('category')),
+                    validator: _required,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _ingredients,
+                    decoration: InputDecoration(
+                      labelText: l10n.t('ingredients'),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _pick(ImageSource.camera),
-                        icon: const Icon(Icons.camera_alt),
-                        label: Text(l10n.t('pickCamera')),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _title,
-                  decoration: InputDecoration(labelText: l10n.t('title')),
-                  validator: _required,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _category,
-                  decoration: InputDecoration(labelText: l10n.t('category')),
-                  validator: _required,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _ingredients,
-                  decoration: InputDecoration(labelText: l10n.t('ingredients')),
-                  minLines: 3,
-                  maxLines: 5,
-                  validator: _required,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _steps,
-                  decoration: InputDecoration(labelText: l10n.t('steps')),
-                  minLines: 4,
-                  maxLines: 8,
-                  validator: _required,
-                ),
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  onPressed: _saving ? null : _save,
-                  icon: const Icon(Icons.save),
-                  label: Text(l10n.t('save')),
-                ),
-              ],
+                    minLines: 3,
+                    maxLines: 5,
+                    validator: _required,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _steps,
+                    decoration: InputDecoration(labelText: l10n.t('steps')),
+                    minLines: 4,
+                    maxLines: 8,
+                    validator: _required,
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: _saving ? null : _save,
+                    icon: const Icon(Icons.save),
+                    label: Text(l10n.t('save')),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

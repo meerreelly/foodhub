@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../shared/presentation/app_header.dart';
 import '../../shared/presentation/glass.dart';
 import '../data/custom_recipe_repository.dart';
 
@@ -40,7 +41,11 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.t('addRecipe'))),
+      backgroundColor: Colors.transparent,
+      appBar: AppHeader(
+        title: l10n.t('addRecipe'),
+        icon: Icons.add_circle_rounded,
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
         children: [

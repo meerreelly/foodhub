@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../shared/presentation/app_header.dart';
 import '../../shared/presentation/glass.dart';
 import '../data/favorites_repository.dart';
 
@@ -16,7 +17,11 @@ class FavoritesScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final favorites = ref.watch(favoritesProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.t('favorites'))),
+      backgroundColor: Colors.transparent,
+      appBar: AppHeader(
+        title: l10n.t('favorites'),
+        icon: Icons.favorite_rounded,
+      ),
       body: favorites.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../shared/presentation/app_header.dart';
 import 'auth_controller.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -73,7 +74,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.t('resetPassword'))),
+      appBar: AppHeader(
+        title: l10n.t('resetPassword'),
+        icon: Icons.lock_reset_rounded,
+      ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),

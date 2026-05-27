@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../shared/presentation/app_header.dart';
 import '../../shared/presentation/glass.dart';
 import '../data/custom_recipe_repository.dart';
 
@@ -20,8 +21,10 @@ class MyRecipesScreen extends ConsumerWidget {
     final recipes = ref.watch(myRecipesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.t('myRecipes')),
+      backgroundColor: Colors.transparent,
+      appBar: AppHeader(
+        title: l10n.t('myRecipes'),
+        icon: Icons.menu_book_rounded,
         actions: [
           IconButton.filledTonal(
             onPressed: () => context.push(AppRoutes.addRecipe),
@@ -34,12 +37,9 @@ class MyRecipesScreen extends ConsumerWidget {
         error: (error, stackTrace) =>
             Center(child: Text(localizedError(context, error))),
         data: (items) {
-          if (items.isEmpty) {
-            return Center(child: Text(l10n.t('emptyMyRecipes')));
-          }
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
-            itemCount: items.length + 1,
+            itemCount: items.length + (items.isEmpty ? 2 : 1),
             separatorBuilder: (context, index) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               if (index == 0) {
@@ -52,6 +52,9 @@ class MyRecipesScreen extends ConsumerWidget {
                     onTap: () => context.push(AppRoutes.addRecipe),
                   ),
                 );
+              }
+              if (items.isEmpty) {
+                return Center(child: Text(l10n.t('emptyMyRecipes')));
               }
               final recipe = items[index - 1];
               return GlassPanel(

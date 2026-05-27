@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/app_localizations.dart';
+import '../../shared/presentation/app_header.dart';
 import '../../shared/presentation/glass.dart';
 import 'settings_controller.dart';
 
@@ -14,7 +15,8 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(settingsControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.t('settings'))),
+      backgroundColor: Colors.transparent,
+      appBar: AppHeader(title: l10n.t('settings'), icon: Icons.settings_rounded),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
         children: [

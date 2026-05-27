@@ -11,6 +11,7 @@ class AppRoutes {
   static const mealPlan = '/meal-plan';
   static const settings = '/settings';
   static const profile = '/profile';
+  static const account = '/account';
 
   static const customRecipePattern = '/my-recipes/:id';
   static const editCustomRecipePattern = '/my-recipes/:id/edit';

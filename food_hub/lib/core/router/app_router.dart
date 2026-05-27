@@ -9,6 +9,7 @@ import '../../features/home/presentation/category_recipes_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/meal_plan/presentation/meal_plan_screen.dart';
 import '../../features/meals/presentation/recipe_details_screen.dart';
+import '../../features/profile/presentation/account_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/recipes/presentation/add_recipe_screen.dart';
 import '../../features/recipes/presentation/custom_recipe_details_screen.dart';
@@ -77,6 +78,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.profile,
             builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.account,
+            builder: (context, state) => const AccountScreen(),
           ),
         ],
       ),

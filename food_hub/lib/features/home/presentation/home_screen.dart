@@ -7,6 +7,7 @@ import '../../../core/constants/app_routes.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../meals/domain/meal.dart';
 import '../../meals/presentation/meal_providers.dart';
+import '../../shared/presentation/app_header.dart';
 import '../../shared/presentation/async_value_view.dart';
 import '../../shared/presentation/glass.dart';
 import '../../shared/presentation/recipe_card.dart';
@@ -25,6 +26,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String _query = '';
   String? _category;
   double _maxIngredients = 12;
+  var _filtersExpanded = false;
 
   @override
   void dispose() {
@@ -46,7 +48,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.t('appName'))),
+      backgroundColor: Colors.transparent,
+      appBar: AppHeader(title: l10n.t('appName'), icon: Icons.restaurant_rounded),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(categoriesProvider);
@@ -56,6 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
           children: [
             GlassPanel(
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -67,103 +71,116 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           decoration: InputDecoration(
                             prefixIcon: const Icon(Icons.search_rounded),
                             hintText: l10n.t('searchHint'),
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
                           ),
                           onSubmitted: (_) => _runSearch(),
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(56, 56),
+                      const SizedBox(width: 8),
+                      IconButton.filledTonal(
+                        tooltip: l10n.t('searchParams'),
+                        style: IconButton.styleFrom(
+                          minimumSize: const Size(46, 46),
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(18),
                           ),
                         ),
-                        onPressed: _runSearch,
-                        child: const Icon(Icons.tune_rounded),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  ExpansionTile(
-                    tilePadding: EdgeInsets.zero,
-                    childrenPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.manage_search_rounded),
-                    title: Text(
-                      l10n.t('searchParams'),
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    children: [
-                      SegmentedButton<SearchMode>(
-                        segments: [
-                          ButtonSegment(
-                            value: SearchMode.name,
-                            icon: const Icon(Icons.restaurant_menu_rounded),
-                            label: Text(l10n.t('searchByName')),
-                          ),
-                          ButtonSegment(
-                            value: SearchMode.ingredient,
-                            icon: const Icon(Icons.eco_rounded),
-                            label: Text(l10n.t('searchByIngredient')),
-                          ),
-                        ],
-                        selected: {_mode},
-                        onSelectionChanged: (value) =>
-                            setState(() => _mode = value.first),
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<String?>(
-                        initialValue: _category,
-                        decoration: InputDecoration(
-                          labelText: l10n.t('category'),
-                          prefixIcon: const Icon(Icons.category_rounded),
+                        onPressed: () => setState(
+                          () => _filtersExpanded = !_filtersExpanded,
                         ),
-                        items: [
-                          DropdownMenuItem(
-                            value: null,
-                            child: Text(l10n.t('allCategories')),
-                          ),
-                          ...categories.valueOrNull
-                                  ?.map(
-                                    (item) => DropdownMenuItem(
-                                      value: item.name,
-                                      child: Text(item.name),
-                                    ),
-                                  )
-                                  .toList() ??
-                              const [],
-                        ],
-                        onChanged: (value) => setState(() => _category = value),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _preferredIngredients,
-                        decoration: InputDecoration(
-                          labelText: l10n.t('preferredIngredients'),
-                          prefixIcon: const Icon(Icons.spa_rounded),
+                        icon: Icon(
+                          _filtersExpanded
+                              ? Icons.tune_rounded
+                              : Icons.tune_outlined,
                         ),
-                        onSubmitted: (_) => _runSearch(),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${l10n.t('maxIngredients')}: ${_maxIngredients.round()}',
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
-                      Slider(
-                        value: _maxIngredients,
-                        min: 3,
-                        max: 20,
-                        divisions: 17,
-                        label: _maxIngredients.round().toString(),
-                        onChanged: (value) =>
-                            setState(() => _maxIngredients = value),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
+            if (_filtersExpanded) ...[
+              const SizedBox(height: 10),
+              GlassPanel(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SegmentedButton<SearchMode>(
+                      segments: [
+                        ButtonSegment(
+                          value: SearchMode.name,
+                          icon: const Icon(Icons.restaurant_menu_rounded),
+                          label: Text(l10n.t('searchByName')),
+                        ),
+                        ButtonSegment(
+                          value: SearchMode.ingredient,
+                          icon: const Icon(Icons.eco_rounded),
+                          label: Text(l10n.t('searchByIngredient')),
+                        ),
+                      ],
+                      selected: {_mode},
+                      onSelectionChanged: (value) =>
+                          setState(() => _mode = value.first),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String?>(
+                      initialValue: _category,
+                      decoration: InputDecoration(
+                        labelText: l10n.t('category'),
+                        prefixIcon: const Icon(Icons.category_rounded),
+                        isDense: true,
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: null,
+                          child: Text(l10n.t('allCategories')),
+                        ),
+                        ...categories.valueOrNull
+                                ?.map(
+                                  (item) => DropdownMenuItem(
+                                    value: item.name,
+                                    child: Text(item.name),
+                                  ),
+                                )
+                                .toList() ??
+                            const [],
+                      ],
+                      onChanged: (value) => setState(() => _category = value),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _preferredIngredients,
+                      decoration: InputDecoration(
+                        labelText: l10n.t('preferredIngredients'),
+                        prefixIcon: const Icon(Icons.spa_rounded),
+                        isDense: true,
+                      ),
+                      onSubmitted: (_) => _runSearch(),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${l10n.t('maxIngredients')}: ${_maxIngredients.round()}',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                    Slider(
+                      value: _maxIngredients,
+                      min: 3,
+                      max: 20,
+                      divisions: 17,
+                      label: _maxIngredients.round().toString(),
+                      onChanged: (value) =>
+                          setState(() => _maxIngredients = value),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             if (hasSearch) ...[
               const SizedBox(height: 18),
               _RecipeResults(value: results),

@@ -20,14 +20,20 @@ class CustomRecipeDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final recipes = ref.watch(myRecipesProvider);
     return recipes.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => const Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(child: CircularProgressIndicator()),
+      ),
       error: (error, stackTrace) =>
-          Scaffold(body: Center(child: Text(localizedError(context, error)))),
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Center(child: Text(localizedError(context, error))),
+          ),
       data: (items) {
         final recipe = _findRecipe(items, id);
         if (recipe == null) {
           return Scaffold(
+            backgroundColor: Colors.transparent,
             appBar: AppBar(),
             body: Center(
               child: Text(AppLocalizations.of(context).t('recipeNotFound')),
@@ -56,11 +62,24 @@ class _DetailsBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             pinned: true,
-            title: Text(recipe.title),
+            title: Row(
+              children: [
+                const Icon(Icons.menu_book_rounded, size: 22),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    recipe.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
             actions: [
               IconButton.filledTonal(
                 onPressed: () =>

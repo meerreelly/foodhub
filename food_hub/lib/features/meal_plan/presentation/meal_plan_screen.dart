@@ -5,8 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_routes.dart';
 import '../../../core/errors/app_error.dart';
 import '../../../core/l10n/app_localizations.dart';
-import '../../shared/presentation/glass.dart';
 import '../../favorites/data/favorites_repository.dart';
+import '../../shared/presentation/app_header.dart';
+import '../../shared/presentation/glass.dart';
 import '../data/meal_plan_repository.dart';
 
 class MealPlanScreen extends ConsumerWidget {
@@ -30,7 +31,15 @@ class MealPlanScreen extends ConsumerWidget {
     final plan = ref.watch(mealPlanProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.t('mealPlan'))),
+      backgroundColor: Colors.transparent,
+      appBar: AppHeader(
+        title: l10n.t('mealPlan'),
+        icon: Icons.calendar_month_rounded,
+        leading: IconButton(
+          onPressed: () => context.go(AppRoutes.profile),
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+      ),
       body: plan.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>

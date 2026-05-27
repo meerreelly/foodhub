@@ -19,6 +19,7 @@ class RecipeDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final meal = ref.watch(mealDetailsProvider(id));
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: AsyncValueView<Meal>(
         value: meal,
         retry: () => ref.invalidate(mealDetailsProvider(id)),
@@ -54,7 +55,19 @@ class _DetailsBody extends ConsumerWidget {
               icon: const Icon(Icons.arrow_back_rounded),
             ),
           ),
-          title: Text(meal.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+          title: Row(
+            children: [
+              const Icon(Icons.restaurant_menu_rounded, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  meal.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 8),
