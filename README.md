@@ -115,6 +115,12 @@ Current test coverage includes:
 - 5 unit tests for recipe/category parsing.
 - 3 widget tests for recipe card rendering, add recipe validation, and Home search behavior.
 
+## GitHub Actions iOS IPA
+
+The `iOS IPA` workflow builds an unsigned release IPA on macOS and uploads it as an artifact.
+
+Create a repository secret named `DOTENV` with the full contents of `food_hub/.env` before running the workflow. The build fails early if this secret is missing.
+
 ## Notes
 
 - Without real Firebase config, authentication actions return a configuration error.
