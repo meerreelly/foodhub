@@ -51,7 +51,7 @@ class AppShell extends StatelessWidget {
         body: child,
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.fromLTRB(10, 0, 10, 12),
-          child: GlassSearchableBottomBar(
+          child: GlassBottomBar(
             tabs: [
               GlassBottomBarTab(
                 icon: const Icon(Icons.home_rounded),
