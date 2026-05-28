@@ -34,7 +34,7 @@ class RecipeCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

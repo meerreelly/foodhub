@@ -47,53 +47,68 @@ class MealPlanScreen extends ConsumerWidget {
         data: (items) {
           final favoriteItems = favorites.valueOrNull ?? const <FavoriteMeal>[];
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
             children: [
               if (favoriteItems.isEmpty)
                 GlassPanel(
+                  padding: EdgeInsets.zero,
                   child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.favorite_border),
+                    dense: true,
+                    visualDensity: VisualDensity.compact,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                    leading: const Icon(Icons.favorite_border, size: 22),
                     title: Text(l10n.t('noFavoritesForPlan')),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: const Icon(Icons.chevron_right, size: 20),
                     onTap: () => context.go(AppRoutes.favorites),
                   ),
                 ),
-              const SizedBox(height: 8),
+              if (favoriteItems.isEmpty) const SizedBox(height: 10),
               ..._dayKeys.map((dayKey) {
                 final day = l10n.t(dayKey);
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: GlassPanel(
                     padding: EdgeInsets.zero,
-                  child: ExpansionTile(
-                    leading: const Icon(Icons.calendar_today_rounded),
-                    title: Text(day),
-                    initiallyExpanded: dayKey == _dayKeys.first,
-                    children: _slots.map((slot) {
-                      final entry = _entryFor(items, dayKey, slot);
-                      return ListTile(
-                        title: Text(l10n.t(slot)),
-                        subtitle: Text(entry?.name ?? l10n.t('emptySlot')),
-                        trailing: favoriteItems.isEmpty
-                            ? null
-                            : PopupMenuButton<FavoriteMeal>(
-                                icon: const Icon(Icons.add),
-                                onSelected: (meal) => ref
-                                    .read(mealPlanRepositoryProvider)
-                                    .setSlot(dayKey, slot, meal),
-                                itemBuilder: (context) => favoriteItems
-                                    .map(
-                                      (meal) => PopupMenuItem(
-                                        value: meal,
-                                        child: Text(meal.name),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                      );
-                    }).toList(),
-                  ),
+                    child: ExpansionTile(
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
+                      tilePadding: const EdgeInsets.symmetric(horizontal: 8),
+                      childrenPadding: const EdgeInsets.only(bottom: 4),
+                      leading: const Icon(
+                        Icons.calendar_today_rounded,
+                        size: 22,
+                      ),
+                      title: Text(day),
+                      initiallyExpanded: dayKey == _dayKeys.first,
+                      children: _slots.map((slot) {
+                        final entry = _entryFor(items, dayKey, slot);
+                        return ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                          ),
+                          title: Text(l10n.t(slot)),
+                          subtitle: Text(entry?.name ?? l10n.t('emptySlot')),
+                          trailing: favoriteItems.isEmpty
+                              ? null
+                              : PopupMenuButton<FavoriteMeal>(
+                                  icon: const Icon(Icons.add, size: 22),
+                                  onSelected: (meal) => ref
+                                      .read(mealPlanRepositoryProvider)
+                                      .setSlot(dayKey, slot, meal),
+                                  itemBuilder: (context) => favoriteItems
+                                      .map(
+                                        (meal) => PopupMenuItem(
+                                          value: meal,
+                                          child: Text(meal.name),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 );
               }),

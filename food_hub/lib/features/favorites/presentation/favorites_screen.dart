@@ -31,7 +31,7 @@ class FavoritesScreen extends ConsumerWidget {
             return Center(child: Text(l10n.t('emptyFavorites')));
           }
           return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
             itemCount: items.length,
             separatorBuilder: (context, index) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
@@ -39,8 +39,11 @@ class FavoritesScreen extends ConsumerWidget {
               return GlassPanel(
                 padding: EdgeInsets.zero,
                 child: ListTile(
-                  contentPadding: const EdgeInsets.all(10),
+                  dense: true,
+                  visualDensity: VisualDensity.compact,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                   leading: CircleAvatar(
+                    radius: 22,
                     backgroundImage: NetworkImage(meal.thumbnailUrl),
                   ),
                   title: Text(meal.name),

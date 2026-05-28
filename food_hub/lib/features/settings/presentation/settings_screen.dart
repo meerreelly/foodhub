@@ -18,9 +18,10 @@ class SettingsScreen extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       appBar: AppHeader(title: l10n.t('settings'), icon: Icons.settings_rounded),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
         children: [
           GlassPanel(
+            padding: const EdgeInsets.all(8),
             child: Column(
               children: [
                 DropdownButtonFormField<String>(
@@ -44,7 +45,7 @@ class SettingsScreen extends ConsumerWidget {
                       .read(settingsControllerProvider.notifier)
                       .setLanguage(value ?? 'uk'),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 DropdownButtonFormField<ThemeMode>(
                   initialValue: settings.themeMode,
                   decoration: InputDecoration(labelText: l10n.t('theme')),

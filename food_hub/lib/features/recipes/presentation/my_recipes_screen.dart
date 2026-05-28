@@ -37,19 +37,22 @@ class MyRecipesScreen extends ConsumerWidget {
         error: (error, stackTrace) =>
             Center(child: Text(localizedError(context, error))),
         data: (items) {
+          if (items.isEmpty) {
+            return Center(child: Text(l10n.t('emptyMyRecipes')));
+          }
+
           return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
-            itemCount: items.length + (items.isEmpty ? 2 : 1),
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
+            itemCount: items.length,
             separatorBuilder: (context, index) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
-              if (items.isEmpty) {
-                return Center(child: Text(l10n.t('emptyMyRecipes')));
-              }
-              final recipe = items[index - 1];
+              final recipe = items[index];
               return GlassPanel(
                 padding: EdgeInsets.zero,
                 child: ListTile(
-                  contentPadding: const EdgeInsets.all(10),
+                  dense: true,
+                  visualDensity: VisualDensity.compact,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                   leading: _RecipeThumb(recipe: recipe),
                   title: Text(recipe.title),
                   subtitle: Text(recipe.category),
@@ -75,7 +78,7 @@ class _RecipeThumb extends StatelessWidget {
     final imageUrl = recipe.imageUrl;
     final localImagePath = recipe.localImagePath;
     return SizedBox.square(
-      dimension: 56,
+      dimension: 44,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: switch ((imageUrl, localImagePath)) {

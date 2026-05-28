@@ -107,7 +107,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             if (_filtersExpanded) ...[
               const SizedBox(height: 10),
               GlassPanel(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -182,10 +182,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ],
             if (hasSearch) ...[
-              const SizedBox(height: 18),
+              const SizedBox(height: 10),
               _RecipeResults(value: results),
             ],
-            const SizedBox(height: 22),
+            const SizedBox(height: 10),
             Text(
               l10n.t('recipeOfDay'),
               style: Theme.of(context).textTheme.titleLarge,
@@ -196,7 +196,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               retry: () => ref.invalidate(randomMealProvider),
               data: (meal) => _RandomMealCard(meal: meal),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 10),
             Text(
               l10n.t('categories'),
               style: Theme.of(context).textTheme.titleLarge,
@@ -281,16 +281,18 @@ class _RandomMealCard extends StatelessWidget {
               tag: 'meal-${meal.id}',
               child: CachedNetworkImage(
                 imageUrl: meal.thumbnailUrl,
-                height: 190,
+                height: 160,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(8),
               child: Text(
                 meal.name,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
               ),
             ),
           ],

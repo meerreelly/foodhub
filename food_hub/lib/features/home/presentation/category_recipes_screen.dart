@@ -24,7 +24,7 @@ class CategoryRecipesScreen extends ConsumerWidget {
           value: meals,
           retry: () => ref.invalidate(categoryMealsProvider(decoded)),
           data: (items) => GridView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
             itemCount: items.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: .78, crossAxisSpacing: 12, mainAxisSpacing: 12),
             itemBuilder: (context, index) => RecipeCard(meal: items[index]),

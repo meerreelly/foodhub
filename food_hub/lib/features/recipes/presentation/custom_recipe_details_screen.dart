@@ -96,13 +96,14 @@ class _DetailsBody extends ConsumerWidget {
             child: _RecipeImage(recipe: recipe),
           ),
           SliverPadding(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
             sliver: SliverList.list(
               children: [
                 if (recipe.category.isNotEmpty)
                   Chip(label: Text(recipe.category)),
-                const SizedBox(height: 18),
+                const SizedBox(height: 10),
                 GlassPanel(
+                  padding: const EdgeInsets.all(8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -115,8 +116,9 @@ class _DetailsBody extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 10),
                 GlassPanel(
+                  padding: const EdgeInsets.all(8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

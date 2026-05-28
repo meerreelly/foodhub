@@ -31,13 +31,14 @@ class AccountScreen extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
         children: [
           GlassPanel(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(8),
             child: Column(
               children: [
                 ListTile(
                   dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.mail_rounded),
+                  visualDensity: VisualDensity.compact,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  leading: const Icon(Icons.mail_rounded, size: 22),
                   title: Text(
                     l10n.t('email'),
                     style: Theme.of(context).textTheme.labelMedium,
@@ -52,11 +53,12 @@ class AccountScreen extends ConsumerWidget {
                 const Divider(height: 18),
                 ListTile(
                   dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.password_rounded),
+                  visualDensity: VisualDensity.compact,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  leading: const Icon(Icons.password_rounded, size: 22),
                   title: Text(l10n.t('editPassword')),
                   subtitle: Text(l10n.t('resetPasswordHint')),
-                  trailing: const Icon(Icons.chevron_right_rounded),
+                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
                   onTap: user == null
                       ? null
                       : () => _resetPassword(context, ref, user.email),

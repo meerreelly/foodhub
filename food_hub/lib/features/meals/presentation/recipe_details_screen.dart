@@ -95,7 +95,7 @@ class _DetailsBody extends ConsumerWidget {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
           sliver: SliverList.list(
             children: [
               Wrap(
@@ -106,8 +106,9 @@ class _DetailsBody extends ConsumerWidget {
                   if (meal.area.isNotEmpty) Chip(label: Text(meal.area)),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 10),
               GlassPanel(
+                padding: const EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -119,8 +120,13 @@ class _DetailsBody extends ConsumerWidget {
                     ...meal.ingredients.map(
                       (item) => ListTile(
                         dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.check_circle_outline_rounded),
+                        visualDensity: VisualDensity.compact,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 8),
+                        leading: const Icon(
+                          Icons.check_circle_outline_rounded,
+                          size: 22,
+                        ),
                         title: Text(item.ingredient),
                         trailing: Text(item.measure),
                       ),
@@ -128,8 +134,9 @@ class _DetailsBody extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 10),
               GlassPanel(
+                padding: const EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -143,7 +150,7 @@ class _DetailsBody extends ConsumerWidget {
                 ),
               ),
               if (meal.youtubeUrl.isNotEmpty) ...[
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 FilledButton.icon(
                   onPressed: () => launchUrl(
                     Uri.parse(meal.youtubeUrl),

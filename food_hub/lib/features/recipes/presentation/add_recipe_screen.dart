@@ -47,9 +47,10 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
         icon: Icons.add_circle_rounded,
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
         children: [
           GlassPanel(
+            padding: const EdgeInsets.all(8),
             child: Form(
               key: _formKey,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -60,7 +61,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                       borderRadius: BorderRadius.circular(12),
                       child: Image.file(
                         _image!,
-                        height: 180,
+                        height: 160,
                         width: double.infinity,
                         fit: BoxFit.cover,
                       ),
@@ -72,22 +73,36 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                       PopupMenuItem(
                         value: ImageSource.gallery,
                         child: ListTile(
-                          leading: const Icon(Icons.photo_library_rounded),
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 8),
+                          leading: const Icon(
+                            Icons.photo_library_rounded,
+                            size: 22,
+                          ),
                           title: Text(l10n.t('pickGallery')),
                         ),
                       ),
                       PopupMenuItem(
                         value: ImageSource.camera,
                         child: ListTile(
-                          leading: const Icon(Icons.camera_alt_rounded),
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 8),
+                          leading: const Icon(
+                            Icons.camera_alt_rounded,
+                            size: 22,
+                          ),
                           title: Text(l10n.t('pickCamera')),
                         ),
                       ),
                     ],
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                        horizontal: 12,
+                        vertical: 10,
                       ),
                       decoration: BoxDecoration(
                         border: Border.all(
@@ -107,19 +122,19 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: _title,
                     decoration: InputDecoration(labelText: l10n.t('title')),
                     validator: _required,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: _category,
                     decoration: InputDecoration(labelText: l10n.t('category')),
                     validator: _required,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: _ingredients,
                     decoration: InputDecoration(labelText: l10n.t('ingredients')),
@@ -127,7 +142,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                     maxLines: 5,
                     validator: _required,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: _steps,
                     decoration: InputDecoration(labelText: l10n.t('steps')),
@@ -135,7 +150,7 @@ class _AddRecipeScreenState extends ConsumerState<AddRecipeScreen> {
                     maxLines: 8,
                     validator: _required,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   FilledButton.icon(
                     onPressed: _saving ? null : _save,
                     icon: const Icon(Icons.save_rounded),

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,7 +17,10 @@ class AuthRepository {
 
   Stream<AppUser?> authStateChanges() {
     if (_firebaseReady) {
-      return FirebaseAuth.instance.authStateChanges().map(_mapUser);
+      return FirebaseAuth.instance.authStateChanges().asyncMap((user) async {
+        await _syncUserProfile(user);
+        return _mapUser(user);
+      });
     }
     return Stream.value(null);
   }
@@ -29,14 +33,20 @@ class AuthRepository {
   Future<void> signIn(String email, String password) async {
     _ensureFirebaseReady();
     if (_firebaseReady) {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      await _syncUserProfile(credential.user);
     }
   }
 
   Future<void> register(String email, String password) async {
     _ensureFirebaseReady();
     if (_firebaseReady) {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      await _syncUserProfile(credential.user, isNewUser: true);
     }
   }
 
@@ -57,6 +67,27 @@ class AuthRepository {
   AppUser? _mapUser(User? user) {
     if (user == null) return null;
     return AppUser(uid: user.uid, email: user.email ?? '');
+  }
+
+  Future<void> _syncUserProfile(User? user, {bool isNewUser = false}) async {
+    if (!_firebaseReady || user == null) return;
+
+    final now = FieldValue.serverTimestamp();
+    final doc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final snapshot = isNewUser ? null : await doc.get();
+    final data = <String, Object?>{
+      'uid': user.uid,
+      'email': user.email ?? '',
+      'displayName': user.displayName,
+      'photoUrl': user.photoURL,
+      'lastSeenAt': now,
+      'updatedAt': now,
+    };
+    if (isNewUser || snapshot?.exists == false) {
+      data['createdAt'] = now;
+    }
+
+    await doc.set(data, SetOptions(merge: true));
   }
 
   void _ensureFirebaseReady() {
