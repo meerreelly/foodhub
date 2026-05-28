@@ -106,30 +106,26 @@ class CustomRecipeRepository {
   Stream<List<CustomRecipe>> watchMine() {
     _loadLocal();
     if (_canSync) {
-      _syncPending();
-      _remoteSubscription ??= _remoteCollection
-          .orderBy('updatedAt', descending: true)
-          .snapshots()
-          .listen((snapshot) async {
-            final db = await LocalDatabase.instance.database;
-            final batch = db.batch();
-            final remoteIds = <String>{};
-            for (final doc in snapshot.docs) {
-              final recipe = CustomRecipe.fromJson(doc.id, doc.data());
-              remoteIds.add(recipe.id);
-              if (await _hasPendingLocal(db, recipe.id)) {
-                continue;
-              }
-              batch.insert(
-                DatabaseTables.customRecipes,
-                recipe.toLocalJson(SyncStatus.synced),
-                conflictAlgorithm: ConflictAlgorithm.replace,
-              );
-            }
-            await _deleteSyncedRowsMissingRemotely(db, remoteIds);
-            await batch.commit(noResult: true);
-            await _loadLocal();
-          });
+      _remoteSubscription ??= _remoteCollection.snapshots().listen((
+        snapshot,
+      ) async {
+        final db = await LocalDatabase.instance.database;
+        final batch = db.batch();
+        final remoteIds = <String>{};
+        for (final doc in snapshot.docs) {
+          final recipe = CustomRecipe.fromJson(doc.id, doc.data());
+          remoteIds.add(recipe.id);
+          batch.insert(
+            DatabaseTables.customRecipes,
+            recipe.toLocalJson(SyncStatus.synced),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+        await _deleteSyncedRowsMissingRemotely(db, remoteIds);
+        await batch.commit(noResult: true);
+        await _loadLocal();
+        await _syncPending();
+      }, onError: _controller.addError);
     }
     return _controller.stream;
   }
@@ -242,7 +238,8 @@ class CustomRecipeRepository {
     );
     for (final row in rows) {
       final recipe = CustomRecipe.fromJson(row['id'].toString(), row);
-      if (row['syncStatus'] == SyncStatus.pendingDelete) {
+      final syncStatus = row['syncStatus'];
+      if (syncStatus == SyncStatus.pendingDelete) {
         try {
           await _remoteCollection.doc(recipe.id).delete();
           await db.delete(
@@ -253,7 +250,7 @@ class CustomRecipeRepository {
         } catch (_) {
           // Keep the pending delete marker for the next sync pass.
         }
-      } else {
+      } else if (syncStatus == SyncStatus.pending) {
         try {
           await _uploadAndSave(recipe);
         } catch (_) {
@@ -262,17 +259,6 @@ class CustomRecipeRepository {
       }
     }
     await _loadLocal();
-  }
-
-  Future<bool> _hasPendingLocal(Database db, String id) async {
-    final rows = await db.query(
-      DatabaseTables.customRecipes,
-      columns: ['syncStatus'],
-      where: 'id = ? AND syncStatus != ?',
-      whereArgs: [id, SyncStatus.synced],
-      limit: 1,
-    );
-    return rows.isNotEmpty;
   }
 
   Future<void> _deleteSyncedRowsMissingRemotely(

@@ -15,25 +15,8 @@ class AppShell extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
-    final tabColor = isLight ? const Color(0xFF17211C) : null;
-    final activeTabColor = isLight ? const Color(0xFF0B120F) : null;
-    final bottomBarTheme = isLight
-        ? theme.copyWith(
-            colorScheme: theme.colorScheme.copyWith(
-              primary: const Color(0xFF0B120F),
-              onPrimary: const Color(0xFF0B120F),
-              onSurface: const Color(0xFF0B120F),
-              onSurfaceVariant: const Color(0xFF17211C),
-              inverseSurface: const Color(0xFF0B120F),
-              onInverseSurface: const Color(0xFF0B120F),
-            ),
-            textTheme: theme.textTheme.apply(
-              bodyColor: const Color(0xFF17211C),
-              displayColor: const Color(0xFF17211C),
-            ),
-            iconTheme: theme.iconTheme.copyWith(color: const Color(0xFF17211C)),
-          )
-        : theme;
+    final tabColor = isLight ? const Color(0xFF17211C) : Colors.white70;
+    final activeTabColor = isLight ? const Color(0xFF0B120F) : Colors.white;
     final location = GoRouterState.of(context).matchedLocation;
     final index = switch (location) {
       AppRoutes.favorites => 1,
@@ -72,60 +55,45 @@ class AppShell extends StatelessWidget {
         body: child,
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.fromLTRB(10, 0, 10, 12),
-          child: Theme(
-            data: bottomBarTheme,
-            child: IconTheme(
-              data: bottomBarTheme.iconTheme.copyWith(color: tabColor),
-              child: DefaultTextStyle.merge(
-                style: TextStyle(color: tabColor),
-                child: GlassBottomBar(
-                  tabs: [
-                    GlassBottomBarTab(
-                      icon: Icon(Icons.home_rounded, color: tabColor),
-                      activeIcon: Icon(
-                        Icons.home_rounded,
-                        color: activeTabColor,
-                      ),
-                      label: l10n.t('home'),
-                    ),
-                    GlassBottomBarTab(
-                      icon: Icon(Icons.favorite_rounded, color: tabColor),
-                      activeIcon: Icon(
-                        Icons.favorite_rounded,
-                        color: activeTabColor,
-                      ),
-                      label: l10n.t('favorites'),
-                    ),
-                    GlassBottomBarTab(
-                      icon: Icon(Icons.menu_book_rounded, color: tabColor),
-                      activeIcon: Icon(
-                        Icons.menu_book_rounded,
-                        color: activeTabColor,
-                      ),
-                      label: l10n.t('myRecipes'),
-                    ),
-                    GlassBottomBarTab(
-                      icon: Icon(Icons.person_rounded, color: tabColor),
-                      activeIcon: Icon(
-                        Icons.person_rounded,
-                        color: activeTabColor,
-                      ),
-                      label: l10n.t('profile'),
-                    ),
-                  ],
-                  selectedIndex: index,
-                  onTabSelected: (value) {
-                    final path = [
-                      AppRoutes.home,
-                      AppRoutes.favorites,
-                      AppRoutes.myRecipes,
-                      AppRoutes.profile,
-                    ][value];
-                    context.go(path);
-                  },
-                ),
-              ),
+          child: GlassBottomBar(
+            selectedIconColor: activeTabColor,
+            unselectedIconColor: tabColor,
+            textStyle: TextStyle(
+              color: tabColor,
+              fontWeight: FontWeight.w700,
             ),
+            tabs: [
+              GlassBottomBarTab(
+                icon: const Icon(Icons.home_rounded),
+                activeIcon: const Icon(Icons.home_rounded),
+                label: l10n.t('home'),
+              ),
+              GlassBottomBarTab(
+                icon: const Icon(Icons.favorite_rounded),
+                activeIcon: const Icon(Icons.favorite_rounded),
+                label: l10n.t('favorites'),
+              ),
+              GlassBottomBarTab(
+                icon: const Icon(Icons.menu_book_rounded),
+                activeIcon: const Icon(Icons.menu_book_rounded),
+                label: l10n.t('myRecipes'),
+              ),
+              GlassBottomBarTab(
+                icon: const Icon(Icons.person_rounded),
+                activeIcon: const Icon(Icons.person_rounded),
+                label: l10n.t('profile'),
+              ),
+            ],
+            selectedIndex: index,
+            onTabSelected: (value) {
+              final path = [
+                AppRoutes.home,
+                AppRoutes.favorites,
+                AppRoutes.myRecipes,
+                AppRoutes.profile,
+              ][value];
+              context.go(path);
+            },
           ),
         ),
       ),

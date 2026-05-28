@@ -72,7 +72,6 @@ class MealPlanRepository {
   Stream<List<MealPlanEntry>> watchPlan() {
     _loadLocal();
     if (_canSync) {
-      _syncPending();
       _remoteSubscription ??= _remoteCollection.snapshots().listen((
         snapshot,
       ) async {
@@ -82,9 +81,6 @@ class MealPlanRepository {
         for (final doc in snapshot.docs) {
           final entry = MealPlanEntry.fromJson(doc.data());
           remoteIds.add(entry.id);
-          if (await _hasPendingLocal(db, entry.id)) {
-            continue;
-          }
           batch.insert(
             DatabaseTables.mealPlan,
             entry.toLocalJson(SyncStatus.synced),
@@ -94,7 +90,8 @@ class MealPlanRepository {
         await _deleteSyncedRowsMissingRemotely(db, remoteIds);
         await batch.commit(noResult: true);
         await _loadLocal();
-      });
+        await _syncPending();
+      }, onError: _controller.addError);
     }
     return _controller.stream;
   }
@@ -163,17 +160,6 @@ class MealPlanRepository {
       }
     }
     await _loadLocal();
-  }
-
-  Future<bool> _hasPendingLocal(Database db, String id) async {
-    final rows = await db.query(
-      DatabaseTables.mealPlan,
-      columns: ['syncStatus'],
-      where: 'id = ? AND syncStatus != ?',
-      whereArgs: [id, SyncStatus.synced],
-      limit: 1,
-    );
-    return rows.isNotEmpty;
   }
 
   Future<void> _deleteSyncedRowsMissingRemotely(
