@@ -84,13 +84,29 @@ class _DetailsBody extends ConsumerWidget {
           ],
         ),
         SliverToBoxAdapter(
-          child: Hero(
-            tag: 'meal-${meal.id}',
-            child: CachedNetworkImage(
-              imageUrl: meal.thumbnailUrl,
-              height: 280,
-              width: double.infinity,
-              fit: BoxFit.cover,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Card(
+              clipBehavior: Clip.antiAlias,
+              margin: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: BorderSide(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outlineVariant
+                      .withValues(alpha: .78),
+                ),
+              ),
+              child: Hero(
+                tag: 'meal-${meal.id}',
+                child: CachedNetworkImage(
+                  imageUrl: meal.thumbnailUrl,
+                  height: 280,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
           ),
         ),

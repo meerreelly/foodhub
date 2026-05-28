@@ -59,7 +59,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
           children: [
             GlassPanel(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(12),
+              radius: 28,
+              clipBehavior: Clip.antiAlias,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -68,14 +70,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Expanded(
                         child: TextField(
                           controller: _search,
-                          decoration: InputDecoration(
+                          decoration: _inputDecoration(
+                            context,
                             prefixIcon: const Icon(Icons.search_rounded),
                             hintText: l10n.t('searchHint'),
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
                           ),
                           onSubmitted: (_) => _runSearch(),
                         ),
@@ -84,10 +82,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       IconButton.filledTonal(
                         tooltip: l10n.t('searchParams'),
                         style: IconButton.styleFrom(
-                          minimumSize: const Size(46, 46),
+                          minimumSize: const Size(48, 48),
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius: BorderRadius.circular(22),
                           ),
                         ),
                         onPressed: () => setState(
@@ -107,11 +105,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             if (_filtersExpanded) ...[
               const SizedBox(height: 10),
               GlassPanel(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(12),
+                radius: 28,
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SegmentedButton<SearchMode>(
+                      style: ButtonStyle(
+                        shape: WidgetStatePropertyAll(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                        ),
+                        side: WidgetStatePropertyAll(
+                          BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outlineVariant
+                                .withValues(alpha: .7),
+                          ),
+                        ),
+                      ),
                       segments: [
                         ButtonSegment(
                           value: SearchMode.name,
@@ -131,10 +146,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String?>(
                       initialValue: _category,
-                      decoration: InputDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      decoration: _inputDecoration(
+                        context,
                         labelText: l10n.t('category'),
                         prefixIcon: const Icon(Icons.category_rounded),
-                        isDense: true,
                       ),
                       items: [
                         DropdownMenuItem(
@@ -156,10 +172,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(height: 10),
                     TextField(
                       controller: _preferredIngredients,
-                      decoration: InputDecoration(
+                      decoration: _inputDecoration(
+                        context,
                         labelText: l10n.t('preferredIngredients'),
                         prefixIcon: const Icon(Icons.spa_rounded),
-                        isDense: true,
                       ),
                       onSubmitted: (_) => _runSearch(),
                     ),
@@ -231,6 +247,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _query = _search.text.trim().isEmpty ? preferred : _search.text.trim();
     });
   }
+
+  InputDecoration _inputDecoration(
+    BuildContext context, {
+    String? labelText,
+    String? hintText,
+    Widget? prefixIcon,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(24),
+      borderSide: BorderSide(
+        color: colors.outlineVariant.withValues(alpha: .72),
+      ),
+    );
+
+    return InputDecoration(
+      labelText: labelText,
+      hintText: hintText,
+      prefixIcon: prefixIcon,
+      isDense: true,
+      filled: true,
+      fillColor: colors.surfaceContainerHighest.withValues(alpha: .38),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: border,
+      enabledBorder: border,
+      focusedBorder: border.copyWith(
+        borderSide: BorderSide(color: colors.primary, width: 1.4),
+      ),
+    );
+  }
 }
 
 class _RecipeResults extends StatelessWidget {
@@ -270,8 +316,17 @@ class _RandomMealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GlassPanel(
-      padding: EdgeInsets.zero,
+    final colors = Theme.of(context).colorScheme;
+    final borderRadius = BorderRadius.circular(18);
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      color: colors.surfaceContainerHigh,
+      shape: RoundedRectangleBorder(
+        borderRadius: borderRadius,
+        side: BorderSide(
+          color: colors.outlineVariant.withValues(alpha: .78),
+        ),
+      ),
       child: InkWell(
         onTap: () => context.push(AppRoutes.recipe(meal.id)),
         child: Column(

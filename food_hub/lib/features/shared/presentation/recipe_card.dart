@@ -13,9 +13,16 @@ class RecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final borderRadius = BorderRadius.circular(18);
     return Card(
       clipBehavior: Clip.antiAlias,
       color: colors.surfaceContainerHigh,
+      shape: RoundedRectangleBorder(
+        borderRadius: borderRadius,
+        side: BorderSide(
+          color: colors.outlineVariant.withValues(alpha: .78),
+        ),
+      ),
       child: InkWell(
         onTap: () => context.push(AppRoutes.recipe(meal.id)),
         child: Column(

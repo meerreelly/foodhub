@@ -13,6 +13,10 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+    final tabColor = isLight ? const Color(0xFF17211C) : null;
+    final activeTabColor = isLight ? const Color(0xFF0B120F) : null;
     final location = GoRouterState.of(context).matchedLocation;
     final index = switch (location) {
       AppRoutes.favorites => 1,
@@ -51,35 +55,57 @@ class AppShell extends StatelessWidget {
         body: child,
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.fromLTRB(10, 0, 10, 12),
-          child: GlassBottomBar(
-            tabs: [
-              GlassBottomBarTab(
-                icon: const Icon(Icons.home_rounded),
-                label: l10n.t('home'),
+          child: IconTheme(
+            data: theme.iconTheme.copyWith(color: tabColor),
+            child: DefaultTextStyle.merge(
+              style: TextStyle(color: tabColor),
+              child: GlassBottomBar(
+                tabs: [
+                  GlassBottomBarTab(
+                    icon: Icon(Icons.home_rounded, color: tabColor),
+                    activeIcon: Icon(
+                      Icons.home_rounded,
+                      color: activeTabColor,
+                    ),
+                    label: l10n.t('home'),
+                  ),
+                  GlassBottomBarTab(
+                    icon: Icon(Icons.favorite_rounded, color: tabColor),
+                    activeIcon: Icon(
+                      Icons.favorite_rounded,
+                      color: activeTabColor,
+                    ),
+                    label: l10n.t('favorites'),
+                  ),
+                  GlassBottomBarTab(
+                    icon: Icon(Icons.menu_book_rounded, color: tabColor),
+                    activeIcon: Icon(
+                      Icons.menu_book_rounded,
+                      color: activeTabColor,
+                    ),
+                    label: l10n.t('myRecipes'),
+                  ),
+                  GlassBottomBarTab(
+                    icon: Icon(Icons.person_rounded, color: tabColor),
+                    activeIcon: Icon(
+                      Icons.person_rounded,
+                      color: activeTabColor,
+                    ),
+                    label: l10n.t('profile'),
+                  ),
+                ],
+                selectedIndex: index,
+                onTabSelected: (value) {
+                  final path = [
+                    AppRoutes.home,
+                    AppRoutes.favorites,
+                    AppRoutes.myRecipes,
+                    AppRoutes.profile,
+                  ][value];
+                  context.go(path);
+                },
               ),
-              GlassBottomBarTab(
-                icon: const Icon(Icons.favorite_rounded),
-                label: l10n.t('favorites'),
-              ),
-              GlassBottomBarTab(
-                icon: const Icon(Icons.menu_book_rounded),
-                label: l10n.t('myRecipes'),
-              ),
-              GlassBottomBarTab(
-                icon: const Icon(Icons.person_rounded),
-                label: l10n.t('profile'),
-              ),
-            ],
-            selectedIndex: index,
-            onTabSelected: (value) {
-              final path = [
-                AppRoutes.home,
-                AppRoutes.favorites,
-                AppRoutes.myRecipes,
-                AppRoutes.profile,
-              ][value];
-              context.go(path);
-            },
+            ),
           ),
         ),
       ),
