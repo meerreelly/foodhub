@@ -38,72 +38,91 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) =>
+            _buildPage(state, const LoginScreen()),
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (context, state) => const RegisterScreen(),
+        pageBuilder: (context, state) =>
+            _buildPage(state, const RegisterScreen()),
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
-        builder: (context, state) => const ForgotPasswordScreen(),
+        pageBuilder: (context, state) =>
+            _buildPage(state, const ForgotPasswordScreen()),
       ),
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),
         routes: [
           GoRoute(
             path: AppRoutes.home,
-            builder: (context, state) => const HomeScreen(),
+            pageBuilder: (context, state) =>
+                _buildPage(state, const HomeScreen()),
           ),
           GoRoute(
             path: AppRoutes.favorites,
-            builder: (context, state) => const FavoritesScreen(),
+            pageBuilder: (context, state) =>
+                _buildPage(state, const FavoritesScreen()),
           ),
           GoRoute(
             path: AppRoutes.addRecipe,
-            builder: (context, state) => const AddRecipeScreen(),
+            pageBuilder: (context, state) =>
+                _buildPage(state, const AddRecipeScreen()),
           ),
           GoRoute(
             path: AppRoutes.myRecipes,
-            builder: (context, state) => const MyRecipesScreen(),
+            pageBuilder: (context, state) =>
+                _buildPage(state, const MyRecipesScreen()),
           ),
           GoRoute(
             path: AppRoutes.mealPlan,
-            builder: (context, state) => const MealPlanScreen(),
+            pageBuilder: (context, state) =>
+                _buildPage(state, const MealPlanScreen()),
           ),
           GoRoute(
             path: AppRoutes.settings,
-            builder: (context, state) => const SettingsScreen(),
+            pageBuilder: (context, state) =>
+                _buildPage(state, const SettingsScreen()),
           ),
           GoRoute(
             path: AppRoutes.profile,
-            builder: (context, state) => const ProfileScreen(),
+            pageBuilder: (context, state) =>
+                _buildPage(state, const ProfileScreen()),
           ),
           GoRoute(
             path: AppRoutes.account,
-            builder: (context, state) => const AccountScreen(),
+            pageBuilder: (context, state) =>
+                _buildPage(state, const AccountScreen()),
           ),
         ],
       ),
       GoRoute(
         path: AppRoutes.editCustomRecipePattern,
-        builder: (context, state) =>
-            EditRecipeScreen(id: state.pathParameters['id']!),
+        pageBuilder: (context, state) => _buildPage(
+          state,
+          EditRecipeScreen(id: state.pathParameters['id']!),
+        ),
       ),
       GoRoute(
         path: AppRoutes.customRecipePattern,
-        builder: (context, state) =>
-            CustomRecipeDetailsScreen(id: state.pathParameters['id']!),
+        pageBuilder: (context, state) => _buildPage(
+          state,
+          CustomRecipeDetailsScreen(id: state.pathParameters['id']!),
+        ),
       ),
       GoRoute(
         path: AppRoutes.categoryPattern,
-        builder: (context, state) =>
-            CategoryRecipesScreen(category: state.pathParameters['name']!),
+        pageBuilder: (context, state) => _buildPage(
+          state,
+          CategoryRecipesScreen(category: state.pathParameters['name']!),
+        ),
       ),
       GoRoute(
         path: AppRoutes.recipePattern,
-        builder: (context, state) =>
-            RecipeDetailsScreen(id: state.pathParameters['id']!),
+        pageBuilder: (context, state) => _buildPage(
+          state,
+          RecipeDetailsScreen(id: state.pathParameters['id']!),
+        ),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
@@ -113,3 +132,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ),
   );
 });
+
+Page<void> _buildPage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 220),
+    reverseTransitionDuration: const Duration(milliseconds: 180),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.025),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        ),
+      );
+    },
+  );
+}

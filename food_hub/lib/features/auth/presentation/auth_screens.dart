@@ -8,6 +8,10 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../shared/presentation/app_header.dart';
 import 'auth_controller.dart';
 
+const _authBackgroundUrl =
+    'https://images.unsplash.com/photo-1495195134817-aeb325a55b65'
+    '?auto=format&fit=crop&w=1600&q=80';
+
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
@@ -77,63 +81,75 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       appBar: AppHeader(
         title: l10n.t('resetPassword'),
         icon: Icons.lock_reset_rounded,
+        leading: IconButton(
+          tooltip: l10n.t('login'),
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => context.go(AppRoutes.login),
+        ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: _email,
-                    decoration: InputDecoration(labelText: l10n.t('email')),
-                    validator: (value) => _emailValidator(context, value),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: _busy
-                        ? null
-                        : () async {
-                            if (!_formKey.currentState!.validate()) {
-                              return;
-                            }
-                            setState(() => _busy = true);
-                            try {
-                              await ref
-                                  .read(authControllerProvider)
-                                  .resetPassword(_email.text.trim());
-                              if (context.mounted) {
-                                context.go(AppRoutes.login);
-                              }
-                            } catch (error) {
-                              if (mounted) {
-                                setState(
-                                  () => _error = localizedError(context, error),
-                                );
-                              }
-                            } finally {
-                              if (mounted) {
-                                setState(() => _busy = false);
-                              }
-                            }
-                          },
-                    child: Text(l10n.t('resetPassword')),
-                  ),
-                  if (_error != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      _error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+      extendBodyBehindAppBar: true,
+      body: _AuthBackground(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: _AuthPanel(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextFormField(
+                        controller: _email,
+                        decoration: InputDecoration(labelText: l10n.t('email')),
+                        validator: (value) => _emailValidator(context, value),
+                        keyboardType: TextInputType.emailAddress,
                       ),
-                    ),
-                  ],
-                ],
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: _busy
+                            ? null
+                            : () async {
+                                if (!_formKey.currentState!.validate()) {
+                                  return;
+                                }
+                                setState(() => _busy = true);
+                                try {
+                                  await ref
+                                      .read(authControllerProvider)
+                                      .resetPassword(_email.text.trim());
+                                  if (context.mounted) {
+                                    context.go(AppRoutes.login);
+                                  }
+                                } catch (error) {
+                                  if (mounted) {
+                                    setState(
+                                      () => _error =
+                                          localizedError(context, error),
+                                    );
+                                  }
+                                } finally {
+                                  if (mounted) {
+                                    setState(() => _busy = false);
+                                  }
+                                }
+                              },
+                        child: Text(l10n.t('resetPassword')),
+                      ),
+                      if (_error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _error!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -184,105 +200,187 @@ class _AuthFormState extends ConsumerState<_AuthForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Form(
-              key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    l10n.t('appName'),
-                    style: Theme.of(context).textTheme.displaySmall,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    l10n.t(widget.titleKey),
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 24),
-                  TextFormField(
-                    controller: _email,
-                    decoration: InputDecoration(labelText: l10n.t('email')),
-                    validator: (value) => _emailValidator(context, value),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _password,
-                    obscureText: true,
-                    decoration: InputDecoration(labelText: l10n.t('password')),
-                    validator: (value) => _passwordValidator(context, value),
-                  ),
-                  if (widget.showConfirm) ...[
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _confirm,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        labelText: l10n.t('confirmPassword'),
+      body: _AuthBackground(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: _AuthPanel(
+                child: Form(
+                  key: _formKey,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        l10n.t('appName'),
+                        style: Theme.of(context).textTheme.displaySmall
+                            ?.copyWith(fontWeight: FontWeight.w800),
                       ),
-                      validator: (value) => value == _password.text
-                          ? null
-                          : l10n.t('passwordsDoNotMatch'),
-                    ),
-                  ],
-                  const SizedBox(height: 18),
-                  FilledButton(
-                    onPressed: _busy
-                        ? null
-                        : () async {
-                            if (!_formKey.currentState!.validate()) {
-                              return;
-                            }
-                            setState(() => _busy = true);
-                            try {
-                              await widget.onSubmit(
-                                _email.text.trim(),
-                                _password.text,
-                              );
-                              if (mounted) {
-                                setState(() => _error = null);
-                              }
-                            } catch (error) {
-                              if (mounted) {
-                                setState(
-                                  () => _error = localizedError(context, error),
-                                );
-                              }
-                            } finally {
-                              if (mounted) {
-                                setState(() => _busy = false);
-                              }
-                            }
-                          },
-                    child: _busy
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(l10n.t(widget.actionKey)),
-                  ),
-                  if (_error != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      _error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+                      const SizedBox(height: 6),
+                      Text(
+                        l10n.t(widget.titleKey),
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                  widget.footer,
-                  if (widget.secondary != null) widget.secondary!,
-                ],
+                      const SizedBox(height: 24),
+                      TextFormField(
+                        controller: _email,
+                        decoration: InputDecoration(labelText: l10n.t('email')),
+                        validator: (value) => _emailValidator(context, value),
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _password,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: l10n.t('password'),
+                        ),
+                        validator: (value) =>
+                            _passwordValidator(context, value),
+                      ),
+                      if (widget.showConfirm) ...[
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _confirm,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: l10n.t('confirmPassword'),
+                          ),
+                          validator: (value) => value == _password.text
+                              ? null
+                              : l10n.t('passwordsDoNotMatch'),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+                      FilledButton(
+                        onPressed: _busy
+                            ? null
+                            : () async {
+                                if (!_formKey.currentState!.validate()) {
+                                  return;
+                                }
+                                setState(() => _busy = true);
+                                try {
+                                  await widget.onSubmit(
+                                    _email.text.trim(),
+                                    _password.text,
+                                  );
+                                  if (mounted) {
+                                    setState(() => _error = null);
+                                  }
+                                } catch (error) {
+                                  if (mounted) {
+                                    setState(
+                                      () => _error =
+                                          localizedError(context, error),
+                                    );
+                                  }
+                                } finally {
+                                  if (mounted) {
+                                    setState(() => _busy = false);
+                                  }
+                                }
+                              },
+                        child: _busy
+                            ? const SizedBox.square(
+                                dimension: 18,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(l10n.t(widget.actionKey)),
+                      ),
+                      if (_error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          _error!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                      widget.footer,
+                      if (widget.secondary != null) widget.secondary!,
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AuthBackground extends StatelessWidget {
+  const _AuthBackground({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final overlay = brightness == Brightness.dark
+        ? Colors.black.withValues(alpha: 0.66)
+        : Colors.white.withValues(alpha: 0.42);
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.network(
+          _authBackgroundUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primaryContainer,
+                    Theme.of(context).colorScheme.surface,
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+        DecoratedBox(decoration: BoxDecoration(color: overlay)),
+        child,
+      ],
+    );
+  }
+}
+
+class _AuthPanel extends StatelessWidget {
+  const _AuthPanel({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 28,
+            offset: const Offset(0, 18),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: child,
       ),
     );
   }

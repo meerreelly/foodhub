@@ -57,11 +57,6 @@ class ProfileScreen extends ConsumerWidget {
                   title: l10n.t('settings'),
                   onTap: () => context.go(AppRoutes.settings),
                 ),
-                _ProfileLink(
-                  icon: Icons.person_rounded,
-                  title: l10n.t('profile'),
-                  onTap: () {},
-                ),
               ],
             ),
           ),

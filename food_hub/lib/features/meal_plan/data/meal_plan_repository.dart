@@ -82,6 +82,9 @@ class MealPlanRepository {
         for (final doc in snapshot.docs) {
           final entry = MealPlanEntry.fromJson(doc.data());
           remoteIds.add(entry.id);
+          if (await _hasPendingLocal(db, entry.id)) {
+            continue;
+          }
           batch.insert(
             DatabaseTables.mealPlan,
             entry.toLocalJson(SyncStatus.synced),
@@ -106,11 +109,25 @@ class MealPlanRepository {
     final db = await LocalDatabase.instance.database;
     await db.insert(
       DatabaseTables.mealPlan,
-      entry.toLocalJson(_canSync ? SyncStatus.synced : SyncStatus.pending),
+      entry.toLocalJson(SyncStatus.pending),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    await _loadLocal();
     if (_canSync) {
-      await _remoteCollection.doc(entry.id).set(entry.toRemoteJson());
+      try {
+        await _remoteCollection.doc(entry.id).set(entry.toRemoteJson());
+        await db.update(
+          DatabaseTables.mealPlan,
+          {
+            'syncStatus': SyncStatus.synced,
+            'updatedAt': DateTime.now().millisecondsSinceEpoch,
+          },
+          where: 'id = ?',
+          whereArgs: [entry.id],
+        );
+      } finally {
+        await _loadLocal();
+      }
     }
     await _loadLocal();
   }
@@ -133,15 +150,30 @@ class MealPlanRepository {
     );
     for (final row in rows) {
       final entry = MealPlanEntry.fromJson(row);
-      await _remoteCollection.doc(entry.id).set(entry.toRemoteJson());
-      await db.update(
-        DatabaseTables.mealPlan,
-        {'syncStatus': SyncStatus.synced},
-        where: 'id = ?',
-        whereArgs: [entry.id],
-      );
+      try {
+        await _remoteCollection.doc(entry.id).set(entry.toRemoteJson());
+        await db.update(
+          DatabaseTables.mealPlan,
+          {'syncStatus': SyncStatus.synced},
+          where: 'id = ?',
+          whereArgs: [entry.id],
+        );
+      } catch (_) {
+        // Keep the pending row for the next sync pass.
+      }
     }
     await _loadLocal();
+  }
+
+  Future<bool> _hasPendingLocal(Database db, String id) async {
+    final rows = await db.query(
+      DatabaseTables.mealPlan,
+      columns: ['syncStatus'],
+      where: 'id = ? AND syncStatus != ?',
+      whereArgs: [id, SyncStatus.synced],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
   }
 
   Future<void> _deleteSyncedRowsMissingRemotely(

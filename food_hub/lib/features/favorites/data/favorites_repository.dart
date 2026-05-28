@@ -89,6 +89,9 @@ class FavoritesRepository {
             for (final doc in snapshot.docs) {
               final favorite = FavoriteMeal.fromJson(doc.data());
               remoteIds.add(favorite.id);
+              if (await _hasPendingLocal(db, favorite.id)) {
+                continue;
+              }
               batch.insert(
                 DatabaseTables.favorites,
                 favorite.toLocalJson(SyncStatus.synced),
@@ -119,28 +122,45 @@ class FavoritesRepository {
         local.first['syncStatus'] != SyncStatus.pendingDelete) {
       await db.insert(
         DatabaseTables.favorites,
-        FavoriteMeal.fromMeal(meal).toLocalJson(
-          _canSync ? SyncStatus.pendingDelete : SyncStatus.pendingDelete,
-        ),
+        FavoriteMeal.fromMeal(meal).toLocalJson(SyncStatus.pendingDelete),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
+      await _loadLocal();
       if (_canSync) {
-        await _remoteCollection.doc(meal.id).delete();
-        await db.delete(
-          DatabaseTables.favorites,
-          where: 'id = ?',
-          whereArgs: [meal.id],
-        );
+        try {
+          await _remoteCollection.doc(meal.id).delete();
+          await db.delete(
+            DatabaseTables.favorites,
+            where: 'id = ?',
+            whereArgs: [meal.id],
+          );
+        } finally {
+          await _loadLocal();
+        }
       }
     } else {
       final favorite = FavoriteMeal.fromMeal(meal);
       await db.insert(
         DatabaseTables.favorites,
-        favorite.toLocalJson(_canSync ? SyncStatus.synced : SyncStatus.pending),
+        favorite.toLocalJson(SyncStatus.pending),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
+      await _loadLocal();
       if (_canSync) {
-        await _remoteCollection.doc(meal.id).set(favorite.toJson());
+        try {
+          await _remoteCollection.doc(meal.id).set(favorite.toJson());
+          await db.update(
+            DatabaseTables.favorites,
+            {
+              'syncStatus': SyncStatus.synced,
+              'updatedAt': DateTime.now().millisecondsSinceEpoch,
+            },
+            where: 'id = ?',
+            whereArgs: [favorite.id],
+          );
+        } finally {
+          await _loadLocal();
+        }
       }
     }
     await _loadLocal();
@@ -168,23 +188,42 @@ class FavoritesRepository {
       final favorite = FavoriteMeal.fromJson(row);
       final doc = _remoteCollection.doc(favorite.id);
       if (row['syncStatus'] == SyncStatus.pendingDelete) {
-        await doc.delete();
-        await db.delete(
-          DatabaseTables.favorites,
-          where: 'id = ?',
-          whereArgs: [favorite.id],
-        );
+        try {
+          await doc.delete();
+          await db.delete(
+            DatabaseTables.favorites,
+            where: 'id = ?',
+            whereArgs: [favorite.id],
+          );
+        } catch (_) {
+          // Keep the pending delete marker for the next sync pass.
+        }
       } else {
-        await doc.set(favorite.toJson());
-        await db.update(
-          DatabaseTables.favorites,
-          {'syncStatus': SyncStatus.synced},
-          where: 'id = ?',
-          whereArgs: [favorite.id],
-        );
+        try {
+          await doc.set(favorite.toJson());
+          await db.update(
+            DatabaseTables.favorites,
+            {'syncStatus': SyncStatus.synced},
+            where: 'id = ?',
+            whereArgs: [favorite.id],
+          );
+        } catch (_) {
+          // Keep the pending row for the next sync pass.
+        }
       }
     }
     await _loadLocal();
+  }
+
+  Future<bool> _hasPendingLocal(Database db, String id) async {
+    final rows = await db.query(
+      DatabaseTables.favorites,
+      columns: ['syncStatus'],
+      where: 'id = ? AND syncStatus != ?',
+      whereArgs: [id, SyncStatus.synced],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
   }
 
   Future<void> _deleteSyncedRowsMissingRemotely(

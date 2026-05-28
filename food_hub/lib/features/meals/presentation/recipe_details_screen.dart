@@ -19,7 +19,7 @@ class RecipeDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final meal = ref.watch(mealDetailsProvider(id));
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: AsyncValueView<Meal>(
         value: meal,
         retry: () => ref.invalidate(mealDetailsProvider(id)),
@@ -48,6 +48,8 @@ class _DetailsBody extends ConsumerWidget {
       slivers: [
         SliverAppBar(
           pinned: true,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
           leading: Padding(
             padding: const EdgeInsets.all(8),
             child: IconButton.filledTonal(

@@ -16,7 +16,7 @@ class CategoryRecipesScreen extends ConsumerWidget {
     final decoded = Uri.decodeComponent(category);
     final meals = ref.watch(categoryMealsProvider(decoded));
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppHeader(title: decoded, icon: Icons.category_rounded),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(categoryMealsProvider(decoded)),

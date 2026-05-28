@@ -30,6 +30,60 @@ class FoodHubApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
       ],
       routerConfig: router,
+      builder: (context, child) {
+        return _KeyboardDismissScope(child: child ?? const SizedBox.shrink());
+      },
     );
+  }
+}
+
+class _KeyboardDismissScope extends StatefulWidget {
+  const _KeyboardDismissScope({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_KeyboardDismissScope> createState() => _KeyboardDismissScopeState();
+}
+
+class _KeyboardDismissScopeState extends State<_KeyboardDismissScope> {
+  final Map<int, double> _downwardDragByPointer = {};
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (event) {
+        _downwardDragByPointer[event.pointer] = 0;
+      },
+      onPointerMove: (event) {
+        if (event.delta.dy <= 0) return;
+
+        final drag = (_downwardDragByPointer[event.pointer] ?? 0) +
+            event.delta.dy;
+        _downwardDragByPointer[event.pointer] = drag;
+
+        if (drag > 16) {
+          _hideKeyboard();
+        }
+      },
+      onPointerUp: (event) {
+        _downwardDragByPointer.remove(event.pointer);
+      },
+      onPointerCancel: (event) {
+        _downwardDragByPointer.remove(event.pointer);
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: _hideKeyboard,
+        child: widget.child,
+      ),
+    );
+  }
+
+  void _hideKeyboard() {
+    final focus = FocusManager.instance.primaryFocus;
+    if (focus == null || !focus.hasFocus) return;
+    focus.unfocus();
   }
 }

@@ -42,17 +42,6 @@ class MyRecipesScreen extends ConsumerWidget {
             itemCount: items.length + (items.isEmpty ? 2 : 1),
             separatorBuilder: (context, index) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
-              if (index == 0) {
-                return GlassPanel(
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.add_circle_rounded),
-                    title: Text(l10n.t('addRecipe')),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => context.push(AppRoutes.addRecipe),
-                  ),
-                );
-              }
               if (items.isEmpty) {
                 return Center(child: Text(l10n.t('emptyMyRecipes')));
               }
@@ -91,20 +80,21 @@ class _RecipeThumb extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         child: switch ((imageUrl, localImagePath)) {
           (final remote, _) when remote.isNotEmpty => CachedNetworkImage(
-            imageUrl: remote,
-            fit: BoxFit.cover,
-            errorWidget: (context, url, error) => const Icon(Icons.restaurant),
-          ),
+              imageUrl: remote,
+              fit: BoxFit.cover,
+              errorWidget: (context, url, error) =>
+                  const Icon(Icons.restaurant),
+            ),
           (_, final local) when local.isNotEmpty => Image.file(
-            File(local),
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.restaurant),
-          ),
+              File(local),
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.restaurant),
+            ),
           _ => const ColoredBox(
-            color: Colors.black12,
-            child: Icon(Icons.restaurant),
-          ),
+              color: Colors.black12,
+              child: Icon(Icons.restaurant),
+            ),
         },
       ),
     );
